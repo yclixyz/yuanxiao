@@ -1,0 +1,60 @@
+﻿<#@ template  language="C#" debug="true" hostspecific="True"#> 
+<#@ import namespace="System"#>
+<#@ import namespace="System.IO"#>
+<#@ output extension="AwardDbConetxt.cs" #>
+<#
+    string projectPath = Host.ResolveAssemblyReference("$(ProjectDir)");  
+	var path =projectPath+ @"\Entity\";
+    var files = System.IO.Directory.GetFiles(path, "*.cs");
+#>
+
+/*******************************************************************************
+* Copyright (C) gugubao
+* 
+* Author: yclixyz
+* Create Date: 2020年1月3日
+* 
+* Revision History:
+* Date         Author               Description
+*
+*********************************************************************************/
+
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+
+namespace Gugubao.Award.Infrastructure
+{
+    /// <summary>
+    /// 数据库连接
+    /// </summary>
+    public class AwardDbConetxt : DbContext
+    {
+        #region DbSet
+<#
+	foreach (var filePath in files)
+    {
+		var file = new FileInfo(filePath);
+		if(file.Name != "BaseEntity.cs")
+		{
+			var name = file.Name.Replace(".cs",string.Empty);
+#>
+		/// <summary>
+        /// <#=name#>
+        /// </summary>
+        public DbSet<<#=name#>> <#=name#> { get; set; }
+<#
+		}
+	}
+#>		#endregion
+
+         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var dataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "award.db");
+
+            optionsBuilder.UseSqlite($"DataSource={dataPath}");
+
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+}
